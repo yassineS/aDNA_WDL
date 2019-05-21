@@ -1,6 +1,6 @@
 # Ignoring cromwell's jar file and GATK's
 cromwell-39.jar
-
+*.jar
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
