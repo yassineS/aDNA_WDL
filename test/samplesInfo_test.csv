@@ -1,3 +1,2 @@
-Project,Sample,Library,Platform,Unit,Run,Fastq1,Fastq2
-pipeline_test1,test1,lib1,Illumina,Unit1,Run1,test/wgs/mt_1.fq.gz,test/wgs/mt_2.fq.gz
-pipeline_test1,test2,lib2,Illumina,Unit1,Run1,test/contamination_Hsapiens_Mmusculus/Hsapiens_Mmusculus_1.fq.gz,test/contamination_Hsapiens_Mmusculus/Hsapiens_Mmusculus_2.fq.gz
+test	S1	lib1	Illumina	Unit1	Run1	/Users/ys/Code/repos/aDNA_WDL/test/wgs/mt_1.fq.gz	/Users/ys/Code/repos/aDNA_WDL/test/wgs/mt_2.fq.gz
+test	S2	lib2	Illumina	Unit1	Run1	/Users/ys/Code/repos/aDNA_WDL/test/contamination_Hsapiens_Mmusculus/Hsapiens_Mmusculus_1.fq.gz	/Users/ys/Code/repos/aDNA_WDL/test/contamination_Hsapiens_Mmusculus/Hsapiens_Mmusculus_2.fq.gz

@@ -6,6 +6,9 @@ cromwell-39.jar
 
 >>>>>>> e86bfb01f6a4ef2d363a4f00ab39d10cb205682a
 
+
+cromwell*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
