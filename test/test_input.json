@@ -1,5 +1,5 @@
 {
-    "AncientDNA.samplesInfoTSV": "test/samplesInfo_test.csv",
+    "AncientDNA.samplesInfoTSV": "test/samplesInfo_test.tsv",
     "AncientDNA.ref_fasta": "test/hg19/hg19.fa",
     "AncientDNA.ref_fasta_index": "test/hg19/hg19.fa.fai",
     "AncientDNA.ref_dict": "test/hg19/hg19.dict",
