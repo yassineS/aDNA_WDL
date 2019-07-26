@@ -18,6 +18,7 @@ workflow AncientDNA_bowtie2 {
   String ref_fasta
   String ref_fasta_basename
   String ref_dict
+  String gatk3_jar
 
   # Data
   File samplesInfoTSV
@@ -214,7 +215,31 @@ task preseq {
     File coverageCurve = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.CoverageCurve.txt"
   }
 }
+
 ## IndelRealignment
+task IndelReal {
+  File collapsed_mapped_markdup_bam
+  File ref_fasta
+  String sampleName
+  String experimentName
+  String runName
+  String libraryName
+  Int cores=4
+
+  command {
+    java -jar  
+  }
+
+  output {
+
+  }
+
+  runtime {
+    cores: cores
+  }
+}
+
+
 ## mapDamage
 ## BamUtil trimbam
 ## Qualimap

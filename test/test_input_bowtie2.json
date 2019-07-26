@@ -8,5 +8,6 @@
     "AncientDNA_bowtie2.ref_amb": "test/hg19/hg19.fa.amb",
     "AncientDNA_bowtie2.ref_ann": "test/hg19/hg19.fa.ann",
     "AncientDNA_bowtie2.ref_pac": "test/hg19/hg19.fa.pac",
-    "AncientDNA_bowtie2.ref_sa": "test/hg19/hg19.fa.sa"
+    "AncientDNA_bowtie2.ref_sa": "test/hg19/hg19.fa.sa",
+    "AncientDNA_bowtie2.gatk3_jar": "resources/GATK-3.8-1-0-gf15c1c3ef.jar"
 }

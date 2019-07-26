@@ -7,5 +7,6 @@
     "AncientDNA_bwa.ref_amb": "test/hg19/hg19.fa.amb",
     "AncientDNA_bwa.ref_ann": "test/hg19/hg19.fa.ann",
     "AncientDNA_bwa.ref_pac": "test/hg19/hg19.fa.pac",
-    "AncientDNA_bwa.ref_sa": "test/hg19/hg19.fa.sa"
+    "AncientDNA_bwa.ref_sa": "test/hg19/hg19.fa.sa",
+    "AncientDNA_bwa.gatk3_jar": "resources/GATK-3.8-1-0-gf15c1c3ef.jar"
 }
