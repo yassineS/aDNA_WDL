@@ -56,7 +56,15 @@ workflow AncientDNA_bowtie2 {
         libraryName = sampleRow[2],
         runName = sampleRow[5]
     }
-    ## Preseq
+    call preseq {
+        input:
+          collapsed_mapped_markdup_bam =  Bowtie2Collapsed.collapsed_mapped_markdup_bam,
+          experimentName = sampleRow[0],
+          ref_fasta_basename = ref_fasta_basename,
+          sampleName = sampleRow[1],
+          libraryName = sampleRow[2],
+          runName = sampleRow[5]
+    }
     ## IndelRealignment
     ## mapDamage
     ## BamUtil trimbam
@@ -165,15 +173,47 @@ task SamtoolsIdxstats {
 
   command {
     samtools idxstats ${collapsed_mapped_markdup_bam} \
-          > ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.statis 
+          > ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.stats 
   }
 
   output {
-    File collapsed_mapped_markdup_stats="${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.statis"
+    File collapsed_mapped_markdup_stats="${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.stats"
   }
 }
 
 ## Preseq
+task preseq {
+  File collapsed_mapped_markdup_bam
+  String ref_fasta_basename
+  String sampleName
+  String experimentName
+  String runName
+  String libraryName
+
+  command {
+    preseq c_curve \
+        -seed 1234 \
+        -bam \
+        -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.ComplexityCurve.txt
+        ${collapsed_mapped_markdup_bam}
+
+    preseq lc_extrap \
+        -seed 1234 \
+        -bam \
+        -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.YieldCurve.txt
+        ${collapsed_mapped_markdup_bam}
+
+    preseq gc_extrap \
+        -seed 1234 \
+        -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.CoverageCurve.txt \
+        ${collapsed_mapped_markdup_bam}
+  }
+  output {
+    File complexityCurve = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.ComplexityCurve.txt"
+    File yieldCurve = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.YieldCurve.txt"
+    File coverageCurve = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.CoverageCurve.txt"
+  }
+}
 ## IndelRealignment
 ## mapDamage
 ## BamUtil trimbam
