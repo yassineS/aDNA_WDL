@@ -1,0 +1,12 @@
+{
+    "AncientDNA_bowtie2.samplesInfoTSV": "test/samplesInfo_test.tsv",
+    "AncientDNA_bowtie2.ref_fasta": "test/hg19/hg19.fa",
+    "AncientDNA_bowtie2.ref_fasta_index": "test/hg19/hg19.fa.fai",
+    "AncientDNA_bowtie2.ref_fasta_basename": "test/hg19/hg19",
+    "AncientDNA_bowtie2.ref_dict": "test/hg19/hg19.dict",
+    "AncientDNA_bowtie2.ref_bwt": "test/hg19/hg19.fa.bwt",
+    "AncientDNA_bowtie2.ref_amb": "test/hg19/hg19.fa.amb",
+    "AncientDNA_bowtie2.ref_ann": "test/hg19/hg19.fa.ann",
+    "AncientDNA_bowtie2.ref_pac": "test/hg19/hg19.fa.pac",
+    "AncientDNA_bowtie2.ref_sa": "test/hg19/hg19.fa.sa"
+}

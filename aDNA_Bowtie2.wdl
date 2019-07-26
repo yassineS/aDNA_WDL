@@ -5,21 +5,23 @@
 
 ## # Runs:
 ##  - FASTP quality control and filtering on input FastQ files
-##  - BWA MEM to map paired and collapsed reads
+##  - Bowtie2 to map paired and collapsed reads
 
 ##########################################################################
 ## Workflow
 
-workflow AncientDNA {
+workflow AncientDNA_bowtie2 {
   # Indexes
   String ref_fasta
+  String ref_fasta_basename
   String ref_fasta_index
   String ref_dict
-  String ref_bwt
-  String ref_amb
-  String ref_ann
-  String ref_pac
-  String ref_sa
+  String ref_bowtie2_1
+  String ref_bowtie2_2
+  String ref_bowtie2_3
+  String ref_bowtie2_4
+  String ref_bowtie2_rev_1
+  String ref_bowtie2_rev_2
 
   # Data
   File samplesInfoTSV
@@ -37,7 +39,7 @@ workflow AncientDNA {
         fastqRead2 = sampleRow[7]
     }
 
-    call BwaMemCollapsed {
+    call Bowtie2Collapsed {
         input:
         experimentName = sampleRow[0],
         sampleName = sampleRow[1],
@@ -46,36 +48,16 @@ workflow AncientDNA {
         unitName = sampleRow[4],
         runName = sampleRow[5],
         ref_fasta = ref_fasta,
-        ref_bwt = ref_bwt,
-        ref_amb = ref_amb,
-        ref_ann = ref_ann,
-        ref_pac = ref_pac,
-        ref_sa = ref_sa,
+        ref_fasta_basename = ref_fasta_basename,
+        ref_bowtie2_1 = ref_bowtie2_1,
+        ref_bowtie2_2 = ref_bowtie2_2,
+        ref_bowtie2_3 = ref_bowtie2_3,
+        ref_bowtie2_4 = ref_bowtie2_4,
+        ref_bowtie2_rev_1 = ref_bowtie2_rev_1,
+        ref_bowtie2_rev_2 = ref_bowtie2_rev_2,
         fastqFilteredCollapsed = FASTP.fastqFilteredCollapsed
     }
-    
-    call BwaMemPE {
-        input:
-        experimentName = sampleRow[0],
-        sampleName = sampleRow[1],
-        libraryName = sampleRow[2],
-        platformName = sampleRow[3],
-        unitName = sampleRow[4],
-        runName = sampleRow[5],
-        ref_fasta = ref_fasta,
-        ref_bwt = ref_bwt,
-        ref_amb = ref_amb,
-        ref_ann = ref_ann,
-        ref_pac = ref_pac,
-        ref_sa = ref_sa,
-        fastqFilteredRead1 = FASTP.fastqFilteredRead1,
-        fastqFilteredRead2 = FASTP.fastqFilteredRead2
-    }
-  } #scatter on input files
-  call MergeBamAlignment{
-    input:
-    
-  } 
+  } #scatter  
 } #workflow
 
 ##########################################################################
@@ -120,14 +102,16 @@ task FASTP {
 }
 
 ## BWA Mapping Collapsed reads
-task BwaMemCollapsed {
+task Bowtie2Collapsed {
   File fastqFilteredCollapsed
+  File ref_fasta_basename
   File ref_fasta
-  File ref_amb
-  File ref_ann
-  File ref_bwt
-  File ref_pac
-  File ref_sa
+  File ref_bowtie2_1
+  File ref_bowtie2_2
+  File ref_bowtie2_3
+  File ref_bowtie2_4
+  File ref_bowtie2_rev_1
+  File ref_bowtie2_rev_2
   String sampleName
   String experimentName
   String runName
@@ -135,30 +119,31 @@ task BwaMemCollapsed {
   String platformName
   String unitName
   Int cores = 4
-
-  # This is the .alt file from bwa-kit (https://github.com/lh3/bwa/tree/master/bwakit), 
-  # listing the reference contigs that are "alternative". Leave blank in JSON for legacy 
-  # references such as b37 and hg19.
-  ###File? ref_alt
-
 
   command {
     set -o pipefail
     set -e
     
-    bwa mem \
-        -K 100000000 \
-        -v 3 \
-        -M \
-        -t ${cores} \
-        -R "@RG\tID:${sampleName}_collapsed_${experimentName}\tLB:${libraryName}\tPL:${platformName}\tPU:${unitName}\tSM:${sampleName}" \
-        ${ref_fasta} \
-        ${fastqFilteredCollapsed} | \
-        samtools view -1 - > ${sampleName}_${experimentName}_${libraryName}_${runName}_collapsed_MEM.bam
+    Bowtie2 \
+        -x ${ref_fasta_basename} \
+        --very-sensitive \
+        --threads ${cores} \
+        -U ${fastqFilteredCollapsed} \
+        --rg-id ${sampleName}_collapsed_${experimentName} \
+        --rg SM:${sampleName} \
+        --rg LB:${libraryName} \
+        --rg PL:${platformName} \
+        --rg PU:${unitName} \ 
+        | samblaster \
+        | samtools sort \
+            -@ ${cores} \
+            -O BAM  \
+            -o ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.bam \
+            - 
   }
 
   output {
-    File collapsed_mapped_bam = "${sampleName}_${experimentName}_${libraryName}_${runName}_collapsed_MEM.bam"
+    File collapsed_mapped_bam = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.bam"
   }
 
   runtime {
@@ -166,71 +151,6 @@ task BwaMemCollapsed {
   }
 }
 
-## BWA Mapping PE reads (non collapsed)
-task BwaMemPE {
-  File fastqFilteredRead1
-  File fastqFilteredRead2
-  File ref_fasta
-  File ref_amb
-  File ref_ann
-  File ref_bwt
-  File ref_pac
-  File ref_sa
-  String sampleName
-  String experimentName
-  String runName
-  String libraryName
-  String platformName
-  String unitName
-  Int cores = 4
-
-  # This is the .alt file from bwa-kit (https://github.com/lh3/bwa/tree/master/bwakit), 
-  # listing the reference contigs that are "alternative". Leave blank in JSON for legacy 
-  # references such as b37 and hg19.
-  ###File? ref_alt
-
-
-  command {
-    set -o pipefail
-    #set -e
-    
-    bwa mem \
-        -K 100000000 \
-        -v 3 \
-        -M \
-        -t ${cores} \
-        -R "@RG\tID:${sampleName}_PE_${experimentName}\tLB:${libraryName}\tPL:${platformName}\tPU:${unitName}\tSM:${sampleName}" \
-        ${ref_fasta} \
-        ${fastqFilteredRead1} ${fastqFilteredRead2} | \
-        samtools view -1 - > ${sampleName}_${experimentName}_${libraryName}_${runName}_PE_MEM.bam
-  }
-
-  output {
-    File collapsed_mapped_bam = "${sampleName}_${experimentName}_${libraryName}_${runName}_PE_MEM.bam"
-  }
-
-  runtime {
-    cores: cores
-  }
-}
-
-## Get version of BWA
-task GetBwaVersion {
-  String docker
-  command {
-    # Not setting "set -o pipefail" here because /bwa has a rc=1 and we don't want to allow rc=1 to succeed 
-    # because the sed may also fail with that error and that is something we actually want to fail on.
-    /usr/gitc/bwa 2>&1 | \
-    grep -e '^Version' | \
-    sed 's/Version: //'
-  }
-  runtime {
-    memory: "1 GB"
-  }
-  output {
-    String version = read_string(stdout())
-  }
-}
 
 ## Merge the two BAM files (Collapsed & PE)
 task MergeBamAlignment {
