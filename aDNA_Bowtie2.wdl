@@ -56,6 +56,16 @@ workflow AncientDNA_bowtie2 {
         libraryName = sampleRow[2],
         runName = sampleRow[5]
     }
+    ## Preseq
+    ## IndelRealignment
+    ## mapDamage
+    ## BamUtil trimbam
+    ## Qualimap
+    ## FreeBayes
+    ## SequenceTools
+    ## Shmutzi
+    ## MultiQC
+    ## Stats
   } #scatter  
 } #workflow
 
@@ -162,3 +172,14 @@ task SamtoolsIdxstats {
     File collapsed_mapped_markdup_stats="${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.statis"
   }
 }
+
+## Preseq
+## IndelRealignment
+## mapDamage
+## BamUtil trimbam
+## Qualimap
+## FreeBayes
+## SequenceTools
+## Shmutzi
+## MultiQC
+## Stats
