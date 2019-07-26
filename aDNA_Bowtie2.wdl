@@ -15,10 +15,9 @@
 
 workflow AncientDNA_bowtie2 {
   # Indexes
-  String ref_fasta
+  File ref_fasta
   String ref_fasta_basename
-  String ref_dict
-  String gatk3_jar
+  File gatk3_jar
 
   # Data
   File samplesInfoTSV
@@ -57,6 +56,7 @@ workflow AncientDNA_bowtie2 {
         libraryName = sampleRow[2],
         runName = sampleRow[5]
     }
+
     call preseq {
         input:
           collapsed_mapped_markdup_bam =  Bowtie2Collapsed.collapsed_mapped_markdup_bam,
@@ -65,6 +65,19 @@ workflow AncientDNA_bowtie2 {
           sampleName = sampleRow[1],
           libraryName = sampleRow[2],
           runName = sampleRow[5]
+    }
+
+    call IndelReal {
+      input:
+          collapsed_mapped_markdup_bam =  Bowtie2Collapsed.collapsed_mapped_markdup_bam,
+          experimentName = sampleRow[0],
+          ref_fasta_basename = ref_fasta_basename,
+          sampleName = sampleRow[1],
+          libraryName = sampleRow[2],
+          runName = sampleRow[5],
+          gatk3_jar = gatk3_jar,
+          ref_fasta = ref_fasta
+
     }
     ## IndelRealignment
     ## mapDamage
@@ -115,7 +128,7 @@ task FASTP {
   }
 
   runtime {
-    cores: cores
+    cpu: cores
   }
 }
 
@@ -159,7 +172,7 @@ task Bowtie2Collapsed {
   }
 
   runtime {
-    cores: cores
+    cpu: cores
   }
 }
 
@@ -220,25 +233,50 @@ task preseq {
 task IndelReal {
   File collapsed_mapped_markdup_bam
   File ref_fasta
+  File gatk3_jar
   String sampleName
   String experimentName
   String runName
   String libraryName
+  String ref_fasta_basename
   Int cores=4
+  String mem='12G'
 
   command {
-    java -jar  
+    java -jar ${gatk3_jar} \
+        -Xmx${mem} \
+        -T RealignerTargetCreator \
+        -R ${ref_fasta} \
+        --num_threads ${cores} \
+        --mismatchFraction 0.30 \
+        --maxIntervalSize 650 \
+        --allow_potentially_misencoded_quality_scores \
+        -I ${collapsed_mapped_markdup_bam} \
+        -o ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.intervals 
+
+
+    java -jar $EBROOTGATK/GenomeAnalysisTK.jar \
+        -Xmx${mem} \
+        -T IndelRealigner \
+        -R ${ref_fasta} \
+        -model USE_READS \
+        -compress 0 \
+        --filter_bases_not_stored \
+        --allow_potentially_misencoded_quality_scores \
+        -I ${collapsed_mapped_markdup_bam} \
+        -targetIntervals ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.intervals \
+        -o ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.bam
   }
 
   output {
-
+    File collapsed_mapped_markdup_IndelReal_bam = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.bam"
   }
 
   runtime {
-    cores: cores
+    cpu: cores
+    memory: mem
   }
 }
-
 
 ## mapDamage
 ## BamUtil trimbam
