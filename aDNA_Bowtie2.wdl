@@ -67,7 +67,7 @@ workflow AncientDNA_bowtie2 {
           runName = sampleRow[5]
     }
 
-    call IndelReal {
+    call IndelRealignment {
       input:
           collapsed_mapped_markdup_bam =  Bowtie2Collapsed.collapsed_mapped_markdup_bam,
           experimentName = sampleRow[0],
@@ -79,8 +79,19 @@ workflow AncientDNA_bowtie2 {
           ref_fasta = ref_fasta
 
     }
-    ## IndelRealignment
-    ## mapDamage
+
+    call mapDamage {
+      input:
+          collapsed_mapped_markdup_bam =  IndelRealignment.collapsed_mapped_markdup_IndelReal_bam,
+          experimentName = sampleRow[0],
+          ref_fasta_basename = ref_fasta_basename,
+          sampleName = sampleRow[1],
+          libraryName = sampleRow[2],
+          runName = sampleRow[5],
+          ref_fasta = ref_fasta
+
+    } 
+
     ## BamUtil trimbam
     ## Qualimap
     ## FreeBayes
@@ -230,7 +241,7 @@ task preseq {
 }
 
 ## IndelRealignment
-task IndelReal {
+task IndelRealignment  {
   File collapsed_mapped_markdup_bam
   File ref_fasta
   File gatk3_jar
@@ -279,7 +290,37 @@ task IndelReal {
 }
 
 ## mapDamage
+task mapDamage {
+  File collapsed_mapped_markdup_IndelReal_bam
+  File ref_fasta
+  String sampleName
+  String experimentName
+  String runName
+  String libraryName
+  String ref_fasta_basename
+
+  command {
+    mapDamage \
+        -i ${collapsed_mapped_markdup_IndelReal_bam}  \
+        -r ${ref_fasta} \
+        -m 25 \
+        -d ./ \
+        --title='${sampleName}_${experimentName}_${libraryName}_${runName}' \
+        --rescale \
+        --rescale-out=${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.bam
+
+    samtools index ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.bam
+  }
+
+  output {
+    File rescaled_bam = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.bam"
+    File smiley_plot = "Fragmisincorporation_plot.pdf"
+    File length_plot = "Length_plot.pdf"
+  }
+}
+
 ## BamUtil trimbam
+
 ## Qualimap
 ## FreeBayes
 ## SequenceTools
