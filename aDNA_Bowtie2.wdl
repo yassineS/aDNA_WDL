@@ -50,6 +50,7 @@ workflow AncientDNA_bowtie2 {
     call SamtoolsIdxstats {
         input:
         collapsed_mapped_markdup_bam =  Bowtie2Collapsed.collapsed_mapped_markdup_bam,
+        experimentName = sampleRow[0],
         ref_fasta_basename = ref_fasta_basename,
         sampleName = sampleRow[1],
         libraryName = sampleRow[2],
