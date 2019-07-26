@@ -6,6 +6,9 @@
 ## # Runs:
 ##  - FASTP quality control and filtering on input FastQ files
 ##  - Bowtie2 to map paired and collapsed reads
+##  - Mark duplicates using samblaster
+##  - Sort with samtools
+##  - Generate mapping stats using samtools idxstats
 
 ##########################################################################
 ## Workflow
@@ -14,14 +17,7 @@ workflow AncientDNA_bowtie2 {
   # Indexes
   String ref_fasta
   String ref_fasta_basename
-  String ref_fasta_index
   String ref_dict
-  String ref_bowtie2_1
-  String ref_bowtie2_2
-  String ref_bowtie2_3
-  String ref_bowtie2_4
-  String ref_bowtie2_rev_1
-  String ref_bowtie2_rev_2
 
   # Data
   File samplesInfoTSV
@@ -47,15 +43,17 @@ workflow AncientDNA_bowtie2 {
         platformName = sampleRow[3],
         unitName = sampleRow[4],
         runName = sampleRow[5],
-        ref_fasta = ref_fasta,
         ref_fasta_basename = ref_fasta_basename,
-        ref_bowtie2_1 = ref_bowtie2_1,
-        ref_bowtie2_2 = ref_bowtie2_2,
-        ref_bowtie2_3 = ref_bowtie2_3,
-        ref_bowtie2_4 = ref_bowtie2_4,
-        ref_bowtie2_rev_1 = ref_bowtie2_rev_1,
-        ref_bowtie2_rev_2 = ref_bowtie2_rev_2,
         fastqFilteredCollapsed = FASTP.fastqFilteredCollapsed
+    }
+
+    call SamtoolsIdxstats {
+        input:
+        collapsed_mapped_markdup_bam =  Bowtie2Collapsed.collapsed_mapped_markdup_bam,
+        ref_fasta_basename = ref_fasta_basename,
+        sampleName = sampleRow[1],
+        libraryName = sampleRow[2],
+        runName = sampleRow[5]
     }
   } #scatter  
 } #workflow
@@ -104,21 +102,14 @@ task FASTP {
 ## BWA Mapping Collapsed reads
 task Bowtie2Collapsed {
   File fastqFilteredCollapsed
-  File ref_fasta_basename
-  File ref_fasta
-  File ref_bowtie2_1
-  File ref_bowtie2_2
-  File ref_bowtie2_3
-  File ref_bowtie2_4
-  File ref_bowtie2_rev_1
-  File ref_bowtie2_rev_2
+  String ref_fasta_basename
   String sampleName
   String experimentName
   String runName
   String libraryName
   String platformName
   String unitName
-  Int cores = 4
+  Int cores=4
 
   command {
     set -o pipefail
@@ -133,17 +124,18 @@ task Bowtie2Collapsed {
         --rg SM:${sampleName} \
         --rg LB:${libraryName} \
         --rg PL:${platformName} \
-        --rg PU:${unitName} \ 
+        --rg PU:${unitName} \
         | samblaster \
         | samtools sort \
             -@ ${cores} \
             -O BAM  \
             -o ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.bam \
             - 
+    samtools index ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.bam
   }
 
   output {
-    File collapsed_mapped_bam = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.bam"
+    File collapsed_mapped_markdup_bam = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup.bam"
   }
 
   runtime {
@@ -151,26 +143,21 @@ task Bowtie2Collapsed {
   }
 }
 
-
-## Merge the two BAM files (Collapsed & PE)
-task MergeBamAlignment {
-  Array[File]+ inputCollapsedBams
-  Array[File]+ inputPeBams
+## IdxStats on bam file
+task SamtoolsIdxstats {
+  File collapsed_mapped_markdup_bam
+  String ref_fasta_basename
+  String sampleName
+  String experimentName
+  String runName
+  String libraryName
 
   command {
-    samtools merge \
-      -@ ${cores} \
-      -s 100000 \
-      -b \
-      -p \
-      -O BAM \
-      -o ${sampleName}_${experimentName}_MEM_Merged.bam \
-      ${sep=" " inputCollapsedBams} ${sep=" " inputPeBams}
+    samtools idxstats ${collapsed_mapped_markdup_bam} \
+          > ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.statis 
   }
-  runtime {
-    cores: cores
-  }
+
   output {
-    File output_bam = "${sampleName}_${experimentName}_MEM_Merged.bam"
+    File collapsed_mapped_markdup_stats="${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.statis"
   }
 }
