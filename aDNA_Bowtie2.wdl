@@ -27,6 +27,7 @@ workflow AncientDNA_bowtie2 {
   File gatk3_jar
   File hgdp_mask
   String ref_bowtie2
+  File java
 
   # Data
   File samplesInfoTSV
@@ -86,7 +87,8 @@ workflow AncientDNA_bowtie2 {
           libraryName = sampleRow[2],
           runName = sampleRow[5],
           gatk3_jar = gatk3_jar,
-          ref_fasta = ref_fasta
+          ref_fasta = ref_fasta,
+          java = java
 
     }
 
@@ -280,6 +282,7 @@ task IndelRealignment  {
   File collapsed_mapped_markdup_bam
   File ref_fasta
   File gatk3_jar
+  File java
   String sampleName
   String experimentName
   String runName
@@ -289,7 +292,7 @@ task IndelRealignment  {
   String mem='12G'
 
   command {
-    java -jar ${gatk3_jar} \
+    ${java} -jar ${gatk3_jar} \
         -Xmx${mem} \
         -T RealignerTargetCreator \
         -R ${ref_fasta} \
@@ -301,7 +304,7 @@ task IndelRealignment  {
         -o ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.intervals 
 
 
-    java -jar $EBROOTGATK/GenomeAnalysisTK.jar \
+    ${java} -jar ${gatk3_jar} \
         -Xmx${mem} \
         -T IndelRealigner \
         -R ${ref_fasta} \
