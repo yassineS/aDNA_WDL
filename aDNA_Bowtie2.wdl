@@ -14,6 +14,8 @@
 ##  - Postmortem damage and base requalibration with mapDamage
 ##  - Softclipping 3bp from both sides of each mapped read
 ##  - Estimating coverage and QC mapped bams (postprocessed bams)
+##  - Calling diploid SNPs where coverage is >=8X, MAQ>=20, and BQ>=20, while \
+##    limiting the calls to the new HGDP929HC mask
 
 ##########################################################################
 ## Workflow
@@ -23,6 +25,7 @@ workflow AncientDNA_bowtie2 {
   File ref_fasta
   String ref_fasta_basename
   File gatk3_jar
+  File hgdp_mask
 
   # Data
   File samplesInfoTSV
@@ -117,7 +120,15 @@ workflow AncientDNA_bowtie2 {
     }
 
     call FreeBayes {
-      input
+      input:
+          trimmed_bam = trimBam.trimmed_bam,
+          ref_fasta = ref_fasta,
+          hgdp_mask = hgdp_mask,
+          experimentName = sampleRow[0],
+          ref_fasta_basename = ref_fasta_basename,
+          sampleName = sampleRow[1],
+          libraryName = sampleRow[2],
+          runName = sampleRow[5]
     }
     ## SequenceTools
     ## Shmutzi
@@ -409,6 +420,27 @@ task Qualimap {
   }
 }
 ## FreeBayes
+task FreeBayes {
+  File trimmed_bam
+  File ref_fasta
+  File hgdp_mask
+  String sampleName
+  String experimentName
+  String runName
+  String libraryName
+  String ref_fasta_basename
+  Int cores=4
+  Int mem=8
+
+  command {
+    freebayes \
+        --bam ${trimmed_bam} \
+        --fasta-reference ${ref_fasta} \
+        --vcf ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.freebayes_Diplo8xMQ20BQ20.vcf.gz \
+        --gvcf ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.freebayes_Diplo8xMQ20BQ20.gvcf.gz \
+
+  }
+}
 ## SequenceTools
 ## Shmutzi
 ## MultiQC
