@@ -26,6 +26,7 @@ workflow AncientDNA_bowtie2 {
   String ref_fasta_basename
   File gatk3_jar
   File hgdp_mask
+  String ref_bowtie2
 
   # Data
   File samplesInfoTSV
@@ -45,14 +46,15 @@ workflow AncientDNA_bowtie2 {
 
     call Bowtie2Collapsed {
         input:
-        experimentName = sampleRow[0],
-        sampleName = sampleRow[1],
-        libraryName = sampleRow[2],
-        platformName = sampleRow[3],
-        unitName = sampleRow[4],
-        runName = sampleRow[5],
-        ref_fasta_basename = ref_fasta_basename,
-        fastqFilteredCollapsed = FASTP.fastqFilteredCollapsed
+          experimentName = sampleRow[0],
+          sampleName = sampleRow[1],
+          libraryName = sampleRow[2],
+          platformName = sampleRow[3],
+          unitName = sampleRow[4],
+          runName = sampleRow[5],
+          ref_fasta_basename = ref_fasta_basename,
+          ref_bowtie2 = ref_bowtie2,
+          fastqFilteredCollapsed = FASTP.fastqFilteredCollapsed
     }
 
     call SamtoolsIdxstats {
@@ -181,6 +183,7 @@ task FASTP {
 ## BWA Mapping Collapsed reads
 task Bowtie2Collapsed {
   File fastqFilteredCollapsed
+  String ref_bowtie2
   String ref_fasta_basename
   String sampleName
   String experimentName
@@ -191,11 +194,8 @@ task Bowtie2Collapsed {
   Int cores=4
 
   command {
-    set -o pipefail
-    set -e
-    
-    Bowtie2 \
-        -x ${ref_fasta_basename} \
+    bowtie2 \
+        -x ${ref_bowtie2} \
         --very-sensitive \
         --threads ${cores} \
         -U ${fastqFilteredCollapsed} \
@@ -210,11 +210,11 @@ task Bowtie2Collapsed {
             -O BAM  \
             -o ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.bam \
             - 
+            
     samtools index ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.bam
   }
-
   output {
-    File collapsed_mapped_markdup_bam = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup.bam"
+    File collapsed_mapped_markdup_bam = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.bam"
   }
 
   runtime {
