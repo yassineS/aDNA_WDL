@@ -1,7 +1,7 @@
 ## # WDL Workflow for aDNA processing
 
 ## Created by: Yassine Souilmi <yassine.souilmi@adelaide.edu.au>
-## Last edited: Tuesday, 21 May 2019
+## Last edited: Tuesday, 27 July 2019
 
 ## # Runs:
 ##  - FASTP quality control and filtering on input FastQ files
@@ -460,4 +460,4 @@ task FreeBayes {
 ## SequenceTools
 ## Shmutzi
 ## MultiQC
-## Stats
+## Stats report
