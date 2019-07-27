@@ -391,7 +391,7 @@ task trimBam {
 
 ## Qualimap
 task Qualimap {
-  File rescaled_bam
+  File trimmed_bam
   String sampleName
   String experimentName
   String runName
