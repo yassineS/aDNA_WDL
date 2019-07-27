@@ -9,6 +9,11 @@
 ##  - Mark duplicates using samblaster
 ##  - Sort with samtools
 ##  - Generate mapping stats using samtools idxstats
+##  - Estimate complexity, coverage and sequencing yield extrapolation
+##  - Indel realignement with GATK
+##  - Postmortem damage and base requalibration with mapDamage
+##  - Softclipping 3bp from both sides of each mapped read
+##  - Estimating coverage and QC mapped bams (postprocessed bams)
 
 ##########################################################################
 ## Workflow
@@ -82,19 +87,38 @@ workflow AncientDNA_bowtie2 {
 
     call mapDamage {
       input:
-          collapsed_mapped_markdup_bam =  IndelRealignment.collapsed_mapped_markdup_IndelReal_bam,
+          collapsed_mapped_markdup_IndelReal_bam = IndelRealignment.collapsed_mapped_markdup_IndelReal_bam,
           experimentName = sampleRow[0],
           ref_fasta_basename = ref_fasta_basename,
           sampleName = sampleRow[1],
           libraryName = sampleRow[2],
           runName = sampleRow[5],
           ref_fasta = ref_fasta
-
     } 
 
-    ## BamUtil trimbam
-    ## Qualimap
-    ## FreeBayes
+    call trimBam {
+      input:
+          rescaled_bam = mapDamage.rescaled_bam,
+          experimentName = sampleRow[0],
+          ref_fasta_basename = ref_fasta_basename,
+          sampleName = sampleRow[1],
+          libraryName = sampleRow[2],
+          runName = sampleRow[5]
+    }
+
+    call Qualimap {
+      input:
+          trimmed_bam = trimBam.trimmed_bam,
+          experimentName = sampleRow[0],
+          ref_fasta_basename = ref_fasta_basename,
+          sampleName = sampleRow[1],
+          libraryName = sampleRow[2],
+          runName = sampleRow[5]
+    }
+
+    call FreeBayes {
+      input
+    }
     ## SequenceTools
     ## Shmutzi
     ## MultiQC
@@ -320,8 +344,70 @@ task mapDamage {
 }
 
 ## BamUtil trimbam
+task trimBam {
+  File rescaled_bam
+  String sampleName
+  String experimentName
+  String runName
+  String libraryName
+  String ref_fasta_basename
+  Int cores=4
+
+  command {
+    bam trimBam \
+        --ignoreStrand \
+        --clip \
+        ${rescaled_bam} \
+        ${sampleName}_${experimentName}_${libraryName}_${runName}_tmp.bam \
+        3
+
+    samtools sort -@ ${cores} \
+        -O BAM \
+        -l 7 \
+        -o ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.bam \
+        ${sampleName}_${experimentName}_${libraryName}_${runName}_tmp.bam
+
+	  samtools index ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.bam
+  }
+  output {
+    File trimmed_bam = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.bam"
+  }
+
+  runtime {
+    cpu: cores
+  }
+}
 
 ## Qualimap
+task Qualimap {
+  File rescaled_bam
+  String sampleName
+  String experimentName
+  String runName
+  String libraryName
+  String ref_fasta_basename
+  Int cores=4
+  Int mem=8
+
+  command {
+    qualimap bamqc \
+        -c \
+        -nt ${cores} \
+        --skip-duplicated --skip-dup-mode 0 \
+        --java-mem-size='${mem}G' \
+        -outdir ./ \    
+        -bam ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.bam
+  }
+  output {
+    File qualimap_html = "qualimapReport.html"
+    File qualimap_report_txt = "genome_results.txt"
+  }
+
+  runtime {
+    cpu: cores
+    memory: mem + "GB"
+  }
+}
 ## FreeBayes
 ## SequenceTools
 ## Shmutzi
