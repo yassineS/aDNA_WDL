@@ -1,2 +1,2 @@
-AHP	A14931	lib1	Illumina	Unit1	Run1	/Users/yassinesouilmi/Dropbox/Projects/Current/ahp-phase1/test_data/A14931_R1.fastq.gz	/Users/yassinesouilmi/Dropbox/Projects/Current/ahp-phase1/test_data/A14931_R2.fastq.gz
-AHP	A14962	lib1	Illumina	Unit1	Run1	/Users/yassinesouilmi/Dropbox/Projects/Current/ahp-phase1/test_data/A14962_R1.fastq.gz	/Users/yassinesouilmi/Dropbox/Projects/Current/ahp-phase1/test_data/A14962_R2.fastq.gz
+AHP	A14931	lib1	Illumina	Unit1	Run1	/home/ubuntu/pipelinetest/data/A14931_R1.fastq.gz	/home/ubuntu/pipelinetest/data/A14931_R2.fastq.gz
+AHP	A14962	lib1	Illumina	Unit1	Run1	/home/ubuntu/pipelinetest/data/A14962_R1.fastq.gz	/home/ubuntu/pipelinetest/data/A14962_R2.fastq.gz

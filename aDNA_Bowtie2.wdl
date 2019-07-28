@@ -275,10 +275,14 @@ task preseq {
     File yieldCurve = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.YieldCurve.txt"
     File coverageCurve = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.CoverageCurve.txt"
   }
+  
+  runtime {
+    docker: "quay.io/biocontainers/preseq"
+  }
 }
 
 ## IndelRealignment
-task IndelRealignment  {
+task IndelRealignment {
   File collapsed_mapped_markdup_bam
   File ref_fasta
   File gatk3_jar
@@ -292,7 +296,8 @@ task IndelRealignment  {
   String mem='12G'
 
   command {
-    ${java} -jar ${gatk3_jar} \
+    ${java} -Xmx${mem} \
+        -jar ${gatk3_jar} \
         -Xmx${mem} \
         -T RealignerTargetCreator \
         -R ${ref_fasta} \
@@ -304,8 +309,8 @@ task IndelRealignment  {
         -o ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.intervals 
 
 
-    ${java} -jar ${gatk3_jar} \
-        -Xmx${mem} \
+    ${java} -Xmx${mem} \
+        -jar ${gatk3_jar} \
         -T IndelRealigner \
         -R ${ref_fasta} \
         -model USE_READS \
