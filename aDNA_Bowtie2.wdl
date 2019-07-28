@@ -259,22 +259,17 @@ task preseq {
  String libraryName
 
  command {
-   type -P preseq &>/dev/null && echo "Found" || spack load preseq
+   #type -P preseq &>/dev/null && echo "Found" || spack load preseq
 
    preseq c_curve \
-       -seed 1234 \
-       -bam \
        -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.ComplexityCurve.txt
-       ${collapsed_mapped_markdup_bam}
+       -bam ${collapsed_mapped_markdup_bam}
 
    preseq lc_extrap \
-       -seed 1234 \
-       -bam \
        -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.YieldCurve.txt
-       ${collapsed_mapped_markdup_bam}
+       -bam ${collapsed_mapped_markdup_bam}
 
    preseq gc_extrap \
-       -seed 1234 \
        -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.CoverageCurve.txt \
        ${collapsed_mapped_markdup_bam}
  }
