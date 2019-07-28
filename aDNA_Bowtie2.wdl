@@ -131,6 +131,7 @@ workflow AncientDNA_bowtie2 {
       input:
           trimmed_bam = trimBam.trimmed_bam,
           ref_fasta = ref_fasta,
+          ref_fasta_fai = ref_fasta_fai,
           hgdp_mask = hgdp_mask,
           experimentName = sampleRow[0],
           ref_fasta_basename = ref_fasta_basename,
@@ -438,6 +439,7 @@ task Qualimap {
 task FreeBayes {
   File trimmed_bam
   File ref_fasta
+  File ref_fasta_fai
   File hgdp_mask
   String sampleName
   String experimentName
