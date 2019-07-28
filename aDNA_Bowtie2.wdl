@@ -282,7 +282,7 @@ task IndelRealignment  {
   File collapsed_mapped_markdup_bam
   File ref_fasta
   File gatk3_jar
-  File java
+  String java
   String sampleName
   String experimentName
   String runName
