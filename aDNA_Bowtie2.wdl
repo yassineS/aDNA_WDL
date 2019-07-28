@@ -260,7 +260,7 @@ task preseq {
 
  command {
    type -P preseq &>/dev/null && echo "Found" || spack load preseq
-   
+
    preseq c_curve \
        -seed 1234 \
        -bam \
@@ -418,13 +418,12 @@ task Qualimap {
   Int mem=8
 
   command {
-    qualimap bamqc \
+    qualimap bamqc -bam ${trimmed_bam} \
         -c \
         -nt ${cores} \
         --skip-duplicated --skip-dup-mode 0 \
         --java-mem-size='${mem}G' \
-        -outdir ./ \    
-        -bam ${trimmed_bam}
+        -outdir ./ 
   }
   output {
     File qualimap_html = "qualimapReport.html"
