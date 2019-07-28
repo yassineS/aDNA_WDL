@@ -250,42 +250,43 @@ task SamtoolsIdxstats {
 }
 
 ## Preseq
-#task preseq {
-#  File collapsed_mapped_markdup_bam
-#  String ref_fasta_basename
-#  String sampleName
-#  String experimentName
-#  String runName
-#  String libraryName
-#
-#  command {
-#    preseq c_curve \
-#        -seed 1234 \
-#        -bam \
-#        -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.ComplexityCurve.txt
-#        ${collapsed_mapped_markdup_bam}
-#
-#    preseq lc_extrap \
-#        -seed 1234 \
-#        -bam \
-#        -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.YieldCurve.txt
-#        ${collapsed_mapped_markdup_bam}
-#
-#    preseq gc_extrap \
-#        -seed 1234 \
-#        -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.CoverageCurve.txt \
-#        ${collapsed_mapped_markdup_bam}
-#  }
-#  output {
-#    File complexityCurve = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.ComplexityCurve.txt"
-#    File yieldCurve = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.YieldCurve.txt"
-#    File coverageCurve = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.CoverageCurve.txt"
-#  }
-#  
-#  runtime {
-#    docker: "quay.io/biocontainers/preseq:2.0.3--h26b358d_2"
-#  }
-#}
+task preseq {
+ File collapsed_mapped_markdup_bam
+ String ref_fasta_basename
+ String sampleName
+ String experimentName
+ String runName
+ String libraryName
+
+ command {
+   type -P preseq &>/dev/null && echo "Found" || spack load preseq
+   
+   preseq c_curve \
+       -seed 1234 \
+       -bam \
+       -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.ComplexityCurve.txt
+       ${collapsed_mapped_markdup_bam}
+
+   preseq lc_extrap \
+       -seed 1234 \
+       -bam \
+       -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.YieldCurve.txt
+       ${collapsed_mapped_markdup_bam}
+
+   preseq gc_extrap \
+       -seed 1234 \
+       -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.CoverageCurve.txt \
+       ${collapsed_mapped_markdup_bam}
+ }
+ output {
+   File complexityCurve = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.ComplexityCurve.txt"
+   File yieldCurve = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.YieldCurve.txt"
+   File coverageCurve = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.CoverageCurve.txt"
+ }
+ runtime {
+
+ }
+}
 
 ## IndelRealignment
 task IndelRealignment {
