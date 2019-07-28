@@ -69,15 +69,15 @@ workflow AncientDNA_bowtie2 {
           runName = sampleRow[5]
     }
 
-   call preseq {
-       input:
-         collapsed_mapped_markdup_bam =  Bowtie2Collapsed.collapsed_mapped_markdup_bam,
-         experimentName = sampleRow[0],
-         ref_fasta_basename = ref_fasta_basename,
-         sampleName = sampleRow[1],
-         libraryName = sampleRow[2],
-         runName = sampleRow[5]
-   }
+  #  call preseq {
+  #      input:
+  #        collapsed_mapped_markdup_bam =  Bowtie2Collapsed.collapsed_mapped_markdup_bam,
+  #        experimentName = sampleRow[0],
+  #        ref_fasta_basename = ref_fasta_basename,
+  #        sampleName = sampleRow[1],
+  #        libraryName = sampleRow[2],
+  #        runName = sampleRow[5]
+  #  }
 
     call IndelRealignment {
       input:
