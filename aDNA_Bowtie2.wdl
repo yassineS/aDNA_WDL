@@ -381,11 +381,11 @@ task trimBam {
 
   command {
     bam trimBam \
-        --ignoreStrand \
-        --clip \
         ${rescaled_bam} \
         ${sampleName}_${experimentName}_${libraryName}_${runName}_tmp.bam \
-        3
+        3 \
+        --ignoreStrand \
+        --clip
 
     samtools sort -@ ${cores} \
         -O BAM \
