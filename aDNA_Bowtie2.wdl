@@ -262,11 +262,11 @@ task preseq {
    #type -P preseq &>/dev/null && echo "Found" || spack load preseq
 
    preseq c_curve \
-       -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.ComplexityCurve.txt
+       -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.ComplexityCurve.txt \
        -bam ${collapsed_mapped_markdup_bam}
 
    preseq lc_extrap \
-       -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.YieldCurve.txt
+       -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.YieldCurve.txt \
        -bam ${collapsed_mapped_markdup_bam}
 
    preseq gc_extrap \
