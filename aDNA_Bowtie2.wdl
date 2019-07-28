@@ -9,7 +9,6 @@
 ##  - Mark duplicates using samblaster
 ##  - Sort with samtools
 ##  - Generate mapping stats using samtools idxstats
-##  - Estimate complexity, coverage and sequencing yield extrapolation
 ##  - Indel realignement with GATK
 ##  - Postmortem damage and base requalibration with mapDamage
 ##  - Softclipping 3bp from both sides of each mapped read
@@ -24,6 +23,7 @@ workflow AncientDNA_bowtie2 {
   # Indexes
   File ref_fasta
   File ref_fasta_fai
+  File ref_dict
   String ref_fasta_basename
   File gatk3_jar
   File hgdp_mask
@@ -61,16 +61,6 @@ workflow AncientDNA_bowtie2 {
 
     call SamtoolsIdxstats {
         input:
-        collapsed_mapped_markdup_bam =  Bowtie2Collapsed.collapsed_mapped_markdup_bam,
-        experimentName = sampleRow[0],
-        ref_fasta_basename = ref_fasta_basename,
-        sampleName = sampleRow[1],
-        libraryName = sampleRow[2],
-        runName = sampleRow[5]
-    }
-
-    call preseq {
-        input:
           collapsed_mapped_markdup_bam =  Bowtie2Collapsed.collapsed_mapped_markdup_bam,
           experimentName = sampleRow[0],
           ref_fasta_basename = ref_fasta_basename,
@@ -79,9 +69,20 @@ workflow AncientDNA_bowtie2 {
           runName = sampleRow[5]
     }
 
+#    call preseq {
+#        input:
+#          collapsed_mapped_markdup_bam =  Bowtie2Collapsed.collapsed_mapped_markdup_bam,
+#          experimentName = sampleRow[0],
+#          ref_fasta_basename = ref_fasta_basename,
+#          sampleName = sampleRow[1],
+#          libraryName = sampleRow[2],
+#          runName = sampleRow[5]
+#    }
+
     call IndelRealignment {
       input:
           collapsed_mapped_markdup_bam =  Bowtie2Collapsed.collapsed_mapped_markdup_bam,
+          collapsed_mapped_markdup_bai =  Bowtie2Collapsed.collapsed_mapped_markdup_bai,
           experimentName = sampleRow[0],
           ref_fasta_basename = ref_fasta_basename,
           sampleName = sampleRow[1],
@@ -90,6 +91,7 @@ workflow AncientDNA_bowtie2 {
           gatk3_jar = gatk3_jar,
           ref_fasta = ref_fasta,
           ref_fasta_fai = ref_fasta_fai,
+	  ref_dict = ref_dict,
           java = java
 
     }
@@ -219,6 +221,7 @@ task Bowtie2Collapsed {
   }
   output {
     File collapsed_mapped_markdup_bam = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.bam"
+    File collapsed_mapped_markdup_bai = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.bam.bai"
   }
 
   runtime {
@@ -246,48 +249,50 @@ task SamtoolsIdxstats {
 }
 
 ## Preseq
-task preseq {
-  File collapsed_mapped_markdup_bam
-  String ref_fasta_basename
-  String sampleName
-  String experimentName
-  String runName
-  String libraryName
-
-  command {
-    preseq c_curve \
-        -seed 1234 \
-        -bam \
-        -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.ComplexityCurve.txt
-        ${collapsed_mapped_markdup_bam}
-
-    preseq lc_extrap \
-        -seed 1234 \
-        -bam \
-        -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.YieldCurve.txt
-        ${collapsed_mapped_markdup_bam}
-
-    preseq gc_extrap \
-        -seed 1234 \
-        -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.CoverageCurve.txt \
-        ${collapsed_mapped_markdup_bam}
-  }
-  output {
-    File complexityCurve = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.ComplexityCurve.txt"
-    File yieldCurve = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.YieldCurve.txt"
-    File coverageCurve = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.CoverageCurve.txt"
-  }
-  
-  runtime {
-    docker: "stevetsa/preseq:2.0"
-  }
-}
+#task preseq {
+#  File collapsed_mapped_markdup_bam
+#  String ref_fasta_basename
+#  String sampleName
+#  String experimentName
+#  String runName
+#  String libraryName
+#
+#  command {
+#    preseq c_curve \
+#        -seed 1234 \
+#        -bam \
+#        -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.ComplexityCurve.txt
+#        ${collapsed_mapped_markdup_bam}
+#
+#    preseq lc_extrap \
+#        -seed 1234 \
+#        -bam \
+#        -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.YieldCurve.txt
+#        ${collapsed_mapped_markdup_bam}
+#
+#    preseq gc_extrap \
+#        -seed 1234 \
+#        -output ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.CoverageCurve.txt \
+#        ${collapsed_mapped_markdup_bam}
+#  }
+#  output {
+#    File complexityCurve = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.ComplexityCurve.txt"
+#    File yieldCurve = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.YieldCurve.txt"
+#    File coverageCurve = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted.CoverageCurve.txt"
+#  }
+#  
+#  runtime {
+#    docker: "quay.io/biocontainers/preseq:2.0.3--h26b358d_2"
+#  }
+#}
 
 ## IndelRealignment
 task IndelRealignment {
   File collapsed_mapped_markdup_bam
+  File collapsed_mapped_markdup_bai
   File ref_fasta
   File ref_fasta_fai
+  File ref_dict
   File gatk3_jar
   String java
   String sampleName
