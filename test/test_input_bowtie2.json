@@ -1,7 +1,7 @@
 {
     "AncientDNA_bowtie2.samplesInfoTSV": "/home/ubuntu/pipelinetest/aDNA_WDL/test/samplesInfo_test.tsv",
     "AncientDNA_bowtie2.ref_fasta": "/home/ubuntu/pipelinetest/aDNA_WDL/test/hg19/hg19.fa",
-    "AncientDNA_bowtie2.ref_fasta_index": "/home/ubuntu/pipelinetest/aDNA_WDL/test/hg19/hg19.fa.fai",
+    "AncientDNA_bowtie2.ref_fasta_fai": "/home/ubuntu/pipelinetest/aDNA_WDL/test/hg19/hg19.fa.fai",
     "AncientDNA_bowtie2.ref_bowtie2": "/home/ubuntu/pipelinetest/aDNA_WDL/test/hg19/hg19.bowtie2",
     "AncientDNA_bowtie2.ref_fasta_basename": "hg19test",
     "AncientDNA_bowtie2.ref_dict": "/home/ubuntu/pipelinetest/aDNA_WDL/test/hg19/hg19.dict",

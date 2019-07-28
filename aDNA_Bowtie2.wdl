@@ -23,6 +23,7 @@
 workflow AncientDNA_bowtie2 {
   # Indexes
   File ref_fasta
+  File ref_fasta_fai
   String ref_fasta_basename
   File gatk3_jar
   File hgdp_mask
@@ -88,6 +89,7 @@ workflow AncientDNA_bowtie2 {
           runName = sampleRow[5],
           gatk3_jar = gatk3_jar,
           ref_fasta = ref_fasta,
+          ref_fasta_fai = ref_fasta_fai,
           java = java
 
     }
@@ -277,7 +279,7 @@ task preseq {
   }
   
   runtime {
-    docker: "quay.io/biocontainers/preseq"
+    docker: "stevetsa/preseq:2.0"
   }
 }
 
@@ -285,6 +287,7 @@ task preseq {
 task IndelRealignment {
   File collapsed_mapped_markdup_bam
   File ref_fasta
+  File ref_fasta_fai
   File gatk3_jar
   String java
   String sampleName
@@ -298,7 +301,6 @@ task IndelRealignment {
   command {
     ${java} -Xmx${mem} \
         -jar ${gatk3_jar} \
-        -Xmx${mem} \
         -T RealignerTargetCreator \
         -R ${ref_fasta} \
         --num_threads ${cores} \
