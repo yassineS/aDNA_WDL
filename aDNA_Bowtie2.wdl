@@ -91,7 +91,7 @@ workflow AncientDNA_bowtie2 {
           gatk3_jar = gatk3_jar,
           ref_fasta = ref_fasta,
           ref_fasta_fai = ref_fasta_fai,
-	  ref_dict = ref_dict,
+	        ref_dict = ref_dict,
           java = java
 
     }
@@ -422,7 +422,7 @@ task Qualimap {
         --skip-duplicated --skip-dup-mode 0 \
         --java-mem-size='${mem}G' \
         -outdir ./ \    
-        -bam ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.bam
+        -bam ${trimmed_bam}
   }
   output {
     File qualimap_html = "qualimapReport.html"
@@ -469,6 +469,11 @@ task FreeBayes {
     File freebayes_vcf = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.freebayes_Diplo8xMQ20BQ20.vcf.gz"
     File freebayes_gvcf = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.freebayes_Diplo8xMQ20BQ20.gvcf.gz"
     File freebayes_contamination_estimates = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.freebayes_Diplo8xMQ20BQ20.ContaminationEstimates.txt"
+  }
+
+  runtime {
+    cpu: cores
+    memory: mem + "GB"
   }
 }
 
