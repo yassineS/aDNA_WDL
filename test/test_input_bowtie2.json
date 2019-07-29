@@ -5,11 +5,6 @@
     "AncientDNA_bowtie2.ref_bowtie2": "/home/ubuntu/pipelinetest/aDNA_WDL/test/hg19/hg19.bowtie2",
     "AncientDNA_bowtie2.ref_fasta_basename": "hg19test",
     "AncientDNA_bowtie2.ref_dict": "/home/ubuntu/pipelinetest/aDNA_WDL/test/hg19/hg19.dict",
-    "AncientDNA_bowtie2.ref_bwt": "/home/ubuntu/pipelinetest/aDNA_WDL/test/hg19/hg19.fa.bwt",
-    "AncientDNA_bowtie2.ref_amb": "/home/ubuntu/pipelinetest/aDNA_WDL/test/hg19/hg19.fa.amb",
-    "AncientDNA_bowtie2.ref_ann": "/home/ubuntu/pipelinetest/aDNA_WDL/test/hg19/hg19.fa.ann",
-    "AncientDNA_bowtie2.ref_pac": "/home/ubuntu/pipelinetest/aDNA_WDL/test/hg19/hg19.fa.pac",
-    "AncientDNA_bowtie2.ref_sa": "/home/ubuntu/pipelinetest/aDNA_WDL/test/hg19/hg19.fa.sa",
     "AncientDNA_bowtie2.gatk3_jar": "/home/ubuntu/pipelinetest/resources/GenomeAnalysisTK.jar",
     "AncientDNA_bowtie2.hgdp_mask": "/home/ubuntu/pipelinetest/aDNA_WDL/test/hg19/hg19.test.mask.bed",
     "AncientDNA_bowtie2.java": "java"

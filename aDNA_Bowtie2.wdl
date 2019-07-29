@@ -446,7 +446,6 @@ task FreeBayes {
 
   command {
     freebayes \
-        --bam ${trimmed_bam} \
         --fasta-reference ${ref_fasta} \
         --targets ${hgdp_mask} \
         --dont-left-align-indels \
@@ -458,14 +457,14 @@ task FreeBayes {
         --use-mapping-quality \
         --genotype-qualities \
         --vcf ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.freebayes_Diplo8xMQ20BQ20.vcf.gz \
-        --contamination-estimates ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.freebayes_Diplo8xMQ20BQ20.ContaminationEstimates.txt
-
-        #--gvcf ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.freebayes_Diplo8xMQ20BQ20.gvcf.gz \
+        --contamination-estimates ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.freebayes_Diplo8xMQ20BQ20.ContaminationEstimates.txt \
+        --gvcf ${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.freebayes_Diplo8xMQ20BQ20.gvcf.gz \
+        ${trimmed_bam}
   }
   
   output {
     File freebayes_vcf = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.freebayes_Diplo8xMQ20BQ20.vcf.gz"
-    #File freebayes_gvcf = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.freebayes_Diplo8xMQ20BQ20.gvcf.gz"
+    File freebayes_gvcf = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.freebayes_Diplo8xMQ20BQ20.gvcf.gz"
     File freebayes_contamination_estimates = "${sampleName}_${experimentName}_${libraryName}_${runName}_${ref_fasta_basename}_collapsed_bowtie2_markdup_sorted_IndelReal.mapDamage.trim3_2ends.freebayes_Diplo8xMQ20BQ20.ContaminationEstimates.txt"
   }
 
